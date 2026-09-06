@@ -10,13 +10,16 @@ jobs:
     - name: Install system dependencies
       run: sudo apt update && sudo apt install -y openjdk-17-jdk zip unzip autoconf automake libtool pkg-config
     - run: pip install buildozer cython
-    - name: Install Android SDK command-line tools
+    - name: Install Android SDK command-line tools (legacy path)
       run: |
-        mkdir -p $HOME/.buildozer/android/platform/android-sdk/cmdline-tools
-        cd $HOME/.buildozer/android/platform/android-sdk/cmdline-tools
+        mkdir -p $HOME/.buildozer/android/platform/android-sdk/tools
+        cd $HOME/.buildozer/android/platform/android-sdk
         wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip
-        unzip -q tools.zip
-        mv cmdline-tools latest
+        unzip -q tools.zip -d cmdline-tools-temp
+        mkdir -p cmdline-tools/latest
+        mv cmdline-tools-temp/cmdline-tools/* cmdline-tools/latest/
+        ln -s cmdline-tools/latest/bin tools/bin
+        rm -rf tools.zip cmdline-tools-temp
     - name: Pre-accept Android SDK licenses
       run: |
         mkdir -p $HOME/.buildozer/android/platform/android-sdk/licenses
