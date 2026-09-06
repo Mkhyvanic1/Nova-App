@@ -5,14 +5,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Build with Buildozer
-      uses: ArtemSBulgakov/buildozer-action@v1
-      with:
-        command: buildozer android debug
-        buildozer_version: stable
+    - uses: actions/setup-python@v5
+      with: {python-version: '3.11'}
+    - run: pip install buildozer cython
+    - run: sudo apt update && sudo apt install -y openjdk-17-jdk zip unzip autoconf automake libtool pkg-config
+    - name: Pre-accept Android SDK licenses
+      run: |
+        mkdir -p $HOME/.buildozer/android/platform/android-sdk/licenses
+        echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo "84831b9409646a918e30573bab4c9c91346d8abd" >> $HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        mkdir -p $HOME/.android
+        touch $HOME/.android/repositories.cfg
+    - name: Build with API key
       env:
         GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      run: buildozer android debug
     - uses: actions/upload-artifact@v4
-      with:
-        name: Nova-APK
-        path: bin/*.apk
+      with: {name: Nova-APK, path: bin/*.apk}
